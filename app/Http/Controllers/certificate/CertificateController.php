@@ -67,19 +67,21 @@ class CertificateController extends Controller
         return view('certificate.index');
     } // Koordinatlı - Ortalı
 
-    public function index3(){
+    public function index3(){ // PDF ok
         header('content-type:image/jpeg');
 
-        $font1= "/Users/odabas/PhpstormProjects/asd123/public/assets/fonts/BRUSHSCI.ttf";
-        $font2= "/Users/odabas/PhpstormProjects/asd123/public/assets/fonts/AGENCYR.ttf";
+        $path = "/Users/webturesyazilim5/PhpstormProjects/laravel-temp-warehouse/public";
+
+        $font1= $path."/assets/fonts/BRUSHSCI.ttf";
+        $font2= $path."/assets/fonts/AGENCYR.ttf";
         //Arkaplan resmi
-        $image=imagecreatefromjpeg("/Users/odabas/PhpstormProjects/asd123/public/assets/images/certificate.jpeg"); // http://127.0.0.1:8000/assets/images/certificate.jpg
+        $image=imagecreatefromjpeg($path."/assets/images/certificate.jpeg"); // http://127.0.0.1:8000/assets/images/certificate.jpg
         //imzalar
-        $imza1= imagecreatefrompng("/Users/odabas/PhpstormProjects/asd123/public/assets/images/signature.png");
+        $imza1= imagecreatefrompng($path."/assets/images/signature.png");
         $imza_w_1 = imagesx($imza1);
         $imza_h_1 = imagesy($imza1);
 
-        $imza2= imagecreatefrompng("/Users/odabas/PhpstormProjects/asd123/public/assets/images/signature2.png");
+        $imza2= imagecreatefrompng($path."/assets/images/signature2.png");
         $imza_w_2 = imagesx($imza2);
         $imza_h_2 = imagesy($imza2);
 
@@ -130,14 +132,23 @@ class CertificateController extends Controller
         if (!is_dir(public_path('certificates'))) File::makeDirectory('certificates'); //certificates klasörü yoksa yeni klasör oluştur.
         // if (!is_dir(public_path('certificates/kurs'))) File::makeDirectory('certificates/kurs'); //kurs dizini yoksa yeni oluştur.
         imagejpeg($image, public_path('certificates/'.$slugName.'.jpg') );
-
+       // imagejpeg($image);
         imagedestroy($image);
 
-        $pdf = PDF::loadFile(public_path('certificates/'.$slugName.'.jpg'));
-        return $pdf->download('invoice.pdf');
+
+        $pdf = PDF::loadView('certificate.index')->setPaper('A4', 'landscape');
+
+        //$content = $pdf->download()->getOriginalContent();
+        // Storage::put('public/csv/name.pdf',$content) ;
+
+        $pdf->save($path . '/certificates/' . $slugName . '.pdf');
+
+
+        return $pdf->stream('aasd.pdf');
+       // return $pdf->download('aasd.pdf');
 
 //        return "Sertifika Oluşturuldu. <br/>". public_path('certificates/'.$slugName.'.jpg');
-//        return view('certificate.index');
+        // return view('certificate.index', compact('image'));
     }
 
 }
